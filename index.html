@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>채널톡 검토 결과 보고</title>
+<title>채널톡 검토 결과 및 비용 보고 (통합)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
   :root{
@@ -32,6 +32,8 @@
     padding:15mm 15mm 13mm;
     box-shadow:0 2px 16px rgba(0,0,0,.14);
   }
+  .sheet + .sheet{ margin-top:0; }
+
   .head{
     display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
     border-bottom:2px solid var(--ink);padding-bottom:9px;
@@ -39,6 +41,22 @@
   h1{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0;}
   .head .meta{font-size:11px;color:var(--slate);text-align:right;line-height:1.7;white-space:nowrap;}
 
+  /* 표지 */
+  .cover{
+    display:flex;flex-direction:column;justify-content:center;align-items:flex-start;
+    min-height:297mm;
+  }
+  .cover .tag{
+    font-size:12.5px;color:var(--accent);font-weight:600;letter-spacing:.02em;margin-bottom:14px;
+  }
+  .cover h1{font-size:34px;line-height:1.35;border-bottom:none;padding-bottom:0;}
+  .cover .sub{font-size:14px;color:var(--slate);margin-top:16px;line-height:1.7;}
+  .cover .doclist{margin-top:40px;border-top:1px solid var(--rule);padding-top:18px;width:100%;max-width:420px;}
+  .cover .doclist div{display:flex;justify-content:space-between;padding:7px 0;font-size:12.5px;border-bottom:1px solid var(--rule);}
+  .cover .doclist div span:first-child{color:var(--slate);}
+  .cover .meta-bottom{margin-top:auto;padding-top:40px;font-size:11px;color:var(--slate);}
+
+  /* 검토결론(1번 문서) */
   .verdict{
     display:grid;grid-template-columns:200px 1fr;
     border:1px solid var(--rule);border-top:none;
@@ -48,6 +66,20 @@
   .verdict .label{font-size:11.5px;color:var(--slate);margin-bottom:4px;}
   .verdict .call{font-size:23px;font-weight:700;letter-spacing:-.03em;color:var(--warn);}
   .verdict .reason{font-size:12px;line-height:1.6;max-width:62em;}
+
+  /* 헤드라인 수치(2번 문서) */
+  .figure{
+    display:grid;grid-template-columns:1.15fr 1fr 1fr;
+    border:1px solid var(--rule);border-top:none;
+  }
+  .figure > div{padding:14px 16px;border-left:1px solid var(--rule);}
+  .figure > div:first-child{border-left:none;background:var(--band);}
+  .figure .label{font-size:11.5px;color:var(--slate);margin-bottom:4px;}
+  .figure .amount{font-size:27px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;}
+  .figure .amount.sub{font-size:20px;font-weight:600;color:var(--ink);}
+  .figure .won{font-size:14px;font-weight:600;margin-left:2px;}
+  .figure .note{font-size:11px;color:var(--slate);margin-top:3px;}
+  .figure .accent{color:var(--accent);}
 
   h2{
     font-size:13.5px;font-weight:700;margin:20px 0 8px;
@@ -60,24 +92,21 @@
   th{font-weight:600;font-size:11.5px;color:var(--slate);border-bottom:1px solid var(--ink);}
   td.n{text-align:right;font-variant-numeric:tabular-nums;}
   th.n{text-align:right;}
-  td.idx{
-    width:26px;text-align:center;color:var(--slate);
-    font-variant-numeric:tabular-nums;font-size:11.5px;padding-top:7px;
-  }
-  td.grp{
-    width:88px;font-weight:600;font-size:11.5px;
-    border-right:1px solid var(--rule);background:#FAFBFB;
-  }
+  td.idx{width:26px;text-align:center;color:var(--slate);font-variant-numeric:tabular-nums;font-size:11.5px;padding-top:7px;}
+  td.grp{width:88px;font-weight:600;font-size:11.5px;border-right:1px solid var(--rule);background:#FAFBFB;}
   tbody tr:last-child td{border-bottom:1px solid var(--ink);}
   tr.total td{font-weight:700;background:var(--band);border-bottom:1px solid var(--ink);}
+  tr.sub-total td{font-weight:600;color:var(--slate);}
   .issue b{font-weight:600;}
   .issue .desc{color:var(--slate);display:block;margin-top:1px;font-size:11.5px;}
-  .flag{
-    display:inline-block;margin-left:6px;padding:0 5px;
-    border:1px solid var(--warn);color:var(--warn);
-    font-size:10px;font-weight:600;border-radius:2px;line-height:1.5;
-    vertical-align:1px;
-  }
+  .flag{display:inline-block;margin-left:6px;padding:0 5px;border:1px solid var(--warn);color:var(--warn);font-size:10px;font-weight:600;border-radius:2px;line-height:1.5;vertical-align:1px;}
+
+  /* 표2(비용표) 전용 - 숫자 우측 정렬 테이블 */
+  table.numeric th,table.numeric td{text-align:right;}
+  table.numeric th:first-child,table.numeric td:first-child{text-align:left;}
+  table.numeric th.c,table.numeric td.c{text-align:center;}
+  table.numeric td.tag{text-align:left;font-size:11px;color:var(--slate);}
+
   ul{margin:6px 0 0;padding-left:17px;}
   li{margin-bottom:5px;}
   li b{font-weight:600;}
@@ -86,23 +115,43 @@
 
   @media print{
     html,body{background:#fff;}
-    .sheet{margin:0;box-shadow:none;width:auto;min-height:0;padding:11mm;}
+    .sheet{margin:0;box-shadow:none;width:auto;min-height:0;padding:11mm;page-break-after:always;}
+    .sheet:last-child{page-break-after:auto;}
     @page{size:A4;margin:9mm;}
   }
   @media (max-width:860px){
     .sheet{width:auto;padding:20px;margin:0;}
     .verdict{grid-template-columns:1fr;}
     .verdict > div{border-left:none;border-top:1px solid var(--rule);}
+    .figure{grid-template-columns:1fr;}
+    .figure > div{border-left:none;border-top:1px solid var(--rule);}
     .split{grid-template-columns:1fr;gap:0;}
     td.grp{width:64px;}
   }
 </style>
 </head>
 <body>
+
+<!-- 표지 -->
+<div class="sheet cover">
+  <div class="tag">종합 보고서</div>
+  <h1>채널톡(ALF) 검토 결과<br>및 비용 분석 보고</h1>
+  <div class="sub">
+    실사용 검증에서 확인된 품질 이슈와 요금제 개편에 따른 비용 전망을<br>
+    종합하여 도입 여부를 검토한 결과입니다.
+  </div>
+  <div class="doclist">
+    <div><span>1부</span><span>채널톡 검토 결과 및 미도입 의견</span></div>
+    <div><span>2부</span><span>챗봇(ALF) 도입 시 월 비용 검토</span></div>
+  </div>
+  <div class="meta-bottom">금액 단위: 원 (월 기준) · 산정 기준: 일 이용자 100명 / 월 30일</div>
+</div>
+
+<!-- ============ 1부: 채널톡 검토 결과 보고 ============ -->
 <div class="sheet">
 
   <div class="head">
-    <h1>채널톡 검토 결과 및 미도입 의견</h1>
+    <h1>1부. 채널톡 검토 결과 및 미도입 의견</h1>
     <div class="meta">
       검토 항목 · 품질 6건 / 비용 2건<br>
       금액 단위: 원 (월 기준)
@@ -173,7 +222,7 @@
       </table>
 
       <h2>3. 요금제 개편 시 비용 전망</h2>
-      <table>
+      <table class="numeric">
         <thead>
           <tr><th>구분</th><th class="n">월 비용</th></tr>
         </thead>
@@ -206,5 +255,104 @@
   </div>
 
 </div>
+
+<!-- ============ 2부: 챗봇 도입 월 비용 보고 ============ -->
+<div class="sheet">
+
+  <div class="head">
+    <h1>2부. 챗봇(ALF) 도입 시 월 비용 검토</h1>
+    <div class="meta">
+      산정 기준 · 일 이용자 100명 / 월 30일<br>
+      단위: 원 (월 기준)
+    </div>
+  </div>
+
+  <div class="figure">
+    <div>
+      <div class="label">월 총 예상 이용료</div>
+      <div class="amount accent">4,045,000<span class="won">원</span></div>
+      <div class="note">기존 플랫폼 + 챗봇 신규 도입 합계</div>
+    </div>
+    <div>
+      <div class="label">기존 플랫폼 이용료</div>
+      <div class="amount sub">2,095,000<span class="won">원</span></div>
+      <div class="note">전체의 51.8%</div>
+    </div>
+    <div>
+      <div class="label">챗봇 도입 추가분</div>
+      <div class="amount sub">1,950,000<span class="won">원</span></div>
+      <div class="note">전체의 48.2%</div>
+    </div>
+  </div>
+
+  <h2>1. 챗봇 도입 추가 비용 <span>세션 단가 × 일 이용자 100명 × 30일</span></h2>
+  <table class="numeric">
+    <thead>
+      <tr>
+        <th>구분</th>
+        <th>세션 단가<br>(24시간 기준)</th>
+        <th class="c">일 이용자</th>
+        <th class="c">월 기준</th>
+        <th>예상 비용</th>
+        <th class="tag">부가세</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>ALF (챗봇 AI)</td><td>500</td><td class="c">100</td><td class="c">30</td><td>1,500,000</td><td class="tag">VAT 포함</td></tr>
+      <tr><td>상담톡</td><td>80</td><td class="c">100</td><td class="c">30</td><td>240,000</td><td class="tag">VAT 별도</td></tr>
+      <tr><td>API 호출비</td><td>70</td><td class="c">100</td><td class="c">30</td><td>210,000</td><td class="tag">VAT 별도</td></tr>
+      <tr class="total"><td colspan="4">소계</td><td>1,950,000</td><td class="tag">—</td></tr>
+    </tbody>
+  </table>
+
+  <h2>2. 월 전체 이용료 내역</h2>
+  <table class="numeric">
+    <thead>
+      <tr><th>항목</th><th>월 금액</th><th class="tag" style="width:34%">비고</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>그로스 요금제</td><td>120,000</td><td class="tag" rowspan="4" style="vertical-align:middle;border-bottom:1px solid var(--rule);">기존 플랫폼 이용료<br><b style="color:var(--ink)">소계 2,095,000원</b></td></tr>
+      <tr><td>플랜기능 MU</td><td>160,000</td></tr>
+      <tr><td>기본 시트</td><td>75,000</td></tr>
+      <tr><td>오프레이트 시트</td><td>1,740,000</td></tr>
+      <tr><td>ALF (챗봇 AI)</td><td>1,500,000</td><td class="tag" rowspan="3" style="vertical-align:middle;">챗봇 도입 추가분<br><b style="color:var(--ink)">소계 1,950,000원</b></td></tr>
+      <tr><td>상담톡</td><td>240,000</td></tr>
+      <tr><td>API 호출비</td><td>210,000</td></tr>
+      <tr class="total"><td>총 금액</td><td>4,045,000</td><td class="tag"></td></tr>
+    </tbody>
+  </table>
+
+  <div class="split">
+    <div>
+      <h2>3. 이용자 수에 따른 변동</h2>
+      <table class="numeric">
+        <thead>
+          <tr><th>일 이용자</th><th>챗봇 비용</th><th>월 총액</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>50명</td><td>975,000</td><td>3,070,000</td></tr>
+          <tr class="total"><td>100명 (기준)</td><td>1,950,000</td><td>4,045,000</td></tr>
+          <tr><td>150명</td><td>2,925,000</td><td>5,020,000</td></tr>
+          <tr><td>200명</td><td>3,900,000</td><td>5,995,000</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h2>4. 검토 필요 사항</h2>
+      <ul>
+        <li><b>비용 구조가 사용량에 연동됩니다.</b> 챗봇 관련 3개 항목의 합산 단가는 세션당 650원으로, 이용자가 늘면 비용도 같은 비율로 증가합니다.</li>
+        <li><b>부가세 기준이 혼재되어 있습니다.</b> 상담톡·API 호출비 450,000원은 VAT 별도로, 부가세 포함 시 약 45,000원이 추가됩니다.</li>
+        <li><b>일 이용자 100명은 가정치입니다.</b> 실제 트래픽 예측치를 확정해야 예산 정확도가 확보됩니다.</li>
+        <li><b>세션 정의 확인이 필요합니다.</b> 24시간 세션 기준이므로, 동일 이용자의 재방문이 어떻게 집계되는지에 따라 실제 비용이 달라질 수 있습니다.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    금액은 모두 월 기준이며, 별도 표기가 없는 항목은 원 자료 기준을 그대로 반영했습니다. 이용자 수 변동 시나리오는 세션 단가 650원을 적용해 산출한 참고 수치입니다.
+  </div>
+
+</div>
+
 </body>
 </html>
